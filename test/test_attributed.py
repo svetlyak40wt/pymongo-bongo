@@ -56,3 +56,10 @@ class AttrListTests(unittest.TestCase):
         al[0][0].b = 123
         self.assertEqual(123, al[0][0].b)
 
+
+    def test_have_eq(self):
+        l = [[{'b': 2}]]
+        al = AttributedList(l)
+
+        self.assertEqual(l, al)
+

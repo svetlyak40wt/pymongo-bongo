@@ -6,6 +6,7 @@
 *.pyc
 *.pyd
 *.egg-info
+.vim/ide.session
 doc
 build
 dist

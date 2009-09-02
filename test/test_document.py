@@ -1,9 +1,9 @@
+import os
 import unittest
-import sys
-sys.path[0:0] = [""]
 
 from pdb import set_trace
 from pymongo import DESCENDING, ASCENDING
+from pymongo.connection import Connection
 from pymongo.database import Database
 from mongobongo import Document
 

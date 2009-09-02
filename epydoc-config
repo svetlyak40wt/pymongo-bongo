@@ -1,0 +1,14 @@
+[epydoc]
+
+modules: mongobongo
+output: html
+verbosity: 1
+debug: 1
+
+docformat: reStructuredText
+inheritance: grouped
+private: no
+imports: no
+
+name: PyMongoBongo
+url: http://github.com/svetlyak40wt/pymongo-bongo/tree/master

@@ -1,0 +1,11 @@
+*~
+.*.swp
+*#*
+.DS*
+*.cm
+*.pyc
+*.pyd
+*.egg-info
+doc
+build
+dist

@@ -37,6 +37,21 @@ class AttrDictTests(unittest.TestCase):
         self.assertEqual(5, d['ddd'][0]['b'])
 
 
+    def test_supports_iteration_by_keys(self):
+        d = {'ddd': {'b': 2}}
+        a = AttributedDict(d)
+
+        self.assertEqual('ddd', iter(d).next())
+        self.assertEqual('ddd', iter(a).next())
+
+
+    def test_supports_iteration_by_items(self):
+        d = {'ddd': {'b': 2}}
+        a = AttributedDict(d)
+
+        self.assertEqual(2, d.iteritems().next()[1]['b'])
+        self.assertEqual(2, a.iteritems().next()[1].b)
+
 
 class AttrListTests(unittest.TestCase):
     def test_attr_list_just_a_proxy(self):
@@ -62,4 +77,11 @@ class AttrListTests(unittest.TestCase):
         al = AttributedList(l)
 
         self.assertEqual(l, al)
+
+
+    def test_supports_iteration(self):
+        l = [{'b': 2}]
+        al = AttributedList(l)
+
+        self.assertEqual(2, iter(al).next().b)
 

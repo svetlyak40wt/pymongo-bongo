@@ -2,18 +2,24 @@
 # 2009, Alexander Artemenko <svetlyak.40wt@gmail.com>
 # For other contacts, visit http://aartemenko.com
 
+
+
+def _wrap(value):
+    """Wraps value in a new AttributedDict or AttributedList."""
+    if isinstance(value, dict):
+        return AttributedDict(value)
+    elif isinstance(value, list):
+        return AttributedList(value)
+    return value
+
+
 class AttributedDict(object):
     def __init__(self, d):
         self._data = d
 
 
     def __getattr__(self, name):
-        value = self._data[name]
-        if isinstance(value, dict):
-            return AttributedDict(value)
-        elif isinstance(value, list):
-            return AttributedList(value)
-        return value
+        return _wrap(self._data[name])
 
 
     def __setattr__(self, name, value):
@@ -37,6 +43,13 @@ class AttributedDict(object):
     def __ne__(self, d):
         return not self.__eq__(d)
 
+    def __iter__(self):
+        return self._data.__iter__()
+
+    def iteritems(self):
+        for key, value in self._data.iteritems():
+            yield (key, _wrap(value))
+
 
 
 class AttributedList(object):
@@ -45,12 +58,7 @@ class AttributedList(object):
 
 
     def __getitem__(self, index):
-        value = self._data[index]
-        if isinstance(value, dict):
-            return AttributedDict(value)
-        elif isinstance(value, list):
-            return AttributedList(value)
-        return value
+        return _wrap(self._data[index])
 
 
     def __eq__(self, l):

@@ -123,3 +123,17 @@ class Documents(unittest.TestCase):
         self.assertEqual('alex', docs[0].user)
         self.assertEqual('olga', docs[1].user)
 
+    def test_default_ordering(self):
+        class TestDoc(Document):
+            collection = 'test_docs'
+            class Meta:
+                ordering = [('user', ASCENDING)]
+
+        names = ['vasily', 'alex', 'zuger', 'olga']
+
+        for name in names:
+            TestDoc(user = name).save()
+
+        for name, doc in zip(sorted(names), TestDoc.objects.all()):
+            self.assertEqual(name, doc.user)
+

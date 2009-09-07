@@ -10,6 +10,34 @@ Author: Alexander Artemenko <svetlyak.40wt@gmail.com>
 
 from mongobongo.attributed import AttributedDict
 
+_DEFAULT_OPTIONS = dict(
+    ordering = None,
+)
+
+class Options(object):
+    """ Document's options.
+    """
+    def __init__(self, meta):
+        self.meta = meta
+        for attr_name, value in _DEFAULT_OPTIONS.iteritems():
+            setattr(self, attr_name, value)
+
+    def contribute_to_class(self, cls, name):
+        cls._meta = self
+
+        if self.meta:
+            meta_attrs = self.meta.__dict__.copy()
+            for name in self.meta.__dict__:
+                if name.startswith('_'):
+                    del meta_attrs[name]
+
+            for attr_name, value in _DEFAULT_OPTIONS.iteritems():
+                setattr(self, attr_name, meta_attrs.pop(attr_name, value))
+
+        del self.meta
+
+
+
 class CollectionManager(object):
     """This class redefines some methods from pymongo.Collection
        to wrap results with user's class."""
@@ -68,12 +96,22 @@ class DocumentBase(type):
 
         module = attrs.pop('__module__')
         new_class = super_new(cls, name, bases, {'__module__': module})
+        attr_meta = attrs.pop('Meta', None)
+
+        if not attr_meta:
+            meta = getattr(new_class, 'Meta', None)
+        else:
+            meta = attr_meta
+
+        new_class.add_to_class('_meta', Options(meta))
 
         collection = attrs.pop('collection')
 
         class CursorProxy(object):
             def __init__(self, real_cursor):
                 self.__cursor = real_cursor
+                self._doctype = new_class
+                self._sorted = False
 
             def next(self):
                 """Wraps result into the custom class"""
@@ -81,6 +119,7 @@ class DocumentBase(type):
 
             def sort(self, *args, **kwargs):
                 self.__cursor.sort(*args, **kwargs)
+                self._sorted = True
                 return self
 
             def __getattr__(self, name):
@@ -100,11 +139,13 @@ class DocumentBase(type):
                 return self.__cursor.__len__()
 
             def __iter__(self):
+                if not self._sorted and self._doctype._meta.ordering:
+                    self.sort(self._doctype._meta.ordering)
                 return self
 
         # Set all neccessary methods
         for key, value in attrs.iteritems():
-            setattr(new_class, key, value)
+            new_class.add_to_class(key, value)
 
         setattr(new_class, 'objects', CollectionManager(
             collection,
@@ -113,6 +154,11 @@ class DocumentBase(type):
         ))
         return new_class
 
+    def add_to_class(cls, name, value):
+        if hasattr(value, 'contribute_to_class'):
+            value.contribute_to_class(cls, name)
+        else:
+            setattr(cls, name, value)
 
 
 class Document(object):

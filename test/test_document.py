@@ -6,6 +6,8 @@ from pymongo import DESCENDING, ASCENDING
 from pymongo.connection import Connection
 from pymongo.database import Database
 from mongobongo import Document
+from mongobongo.attributed import AttributedDict
+
 
 
 def get_connection():
@@ -96,8 +98,6 @@ class Documents(unittest.TestCase):
         self.assertEqual(dict(title = 'Just a Poem', tags = ['one', 'two']), doc.article)
 
     def test_dict_proxy(self):
-        from pymongo.document import AttributedDict
-
         d = dict(title = 'Just an Example', tags = ['test', 'python'])
         dp = AttributedDict(d)
         dp.author = dict(name = 'Alexander')

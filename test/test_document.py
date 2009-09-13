@@ -5,7 +5,8 @@ from pdb import set_trace
 from pymongo import DESCENDING, ASCENDING
 from pymongo.connection import Connection
 from pymongo.database import Database
-from mongobongo import Document
+
+from mongobongo.document import Document, get_doc_class_for_collection
 from mongobongo.attributed import AttributedDict
 
 
@@ -25,7 +26,9 @@ class TestDoc(Document):
 
 class Documents(unittest.TestCase):
     def setUp(self):
-        TestDoc.objects.db = Database(get_connection(), "pymongo_test")
+        db = Database(get_connection(), "pymongo_test")
+
+        TestDoc.objects.db = db
         TestDoc.objects.remove()
 
     def test_save_and_find(self):
@@ -136,4 +139,48 @@ class Documents(unittest.TestCase):
 
         for name, doc in zip(sorted(names), TestDoc.objects.all()):
             self.assertEqual(name, doc.user)
+
+
+
+class Article(Document):
+    collection = 'articles'
+
+
+class Author(Document):
+    collection = 'authors'
+
+
+class References(unittest.TestCase):
+    def setUp(self):
+        db = Database(get_connection(), "pymongo_test")
+
+        Article.objects.db = db
+        Article.objects.remove()
+        Author.objects.remove()
+
+    def testDocClassAutoregistration(self):
+        self.assertEqual(Article, get_doc_class_for_collection('articles'))
+        self.assertEqual(Author, get_doc_class_for_collection('authors'))
+
+
+    def testReferenceObject(self):
+        author = Author(name = 'Alexander')
+        author.save()
+
+        article =  Article(title = 'Life is miracle', author = author)
+        article.save()
+
+        article = Article.objects.find_one()
+
+        self.assertEqual('Alexander', article.author.name)
+        self.assertEqual(Author, type(article.author))
+
+
+    def testSaveReferenceObjectWithParent(self):
+        author = Author(name = 'Alexander')
+        article =  Article(title = 'Life is miracle', author = author)
+
+        self.assert_(author._id is None)
+        article.save()
+        self.assert_(author._id is not None)
 

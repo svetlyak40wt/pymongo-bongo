@@ -8,11 +8,14 @@ This is a helper to work with MongoDB's documents.
 Author: Alexander Artemenko <svetlyak.40wt@gmail.com>
 """
 
+import types
+from pymongo.dbref import DBRef
 from mongobongo.attributed import AttributedDict
 
 _DEFAULT_OPTIONS = dict(
     ordering = None,
 )
+
 
 class Options(object):
     """ Document's options.
@@ -78,6 +81,34 @@ class CollectionManager(object):
         if data:
             data = self._document_class(__kwargs = data)
         return data
+
+    def dereference(self, dbref):
+        doc_cls = get_doc_class_for_collection(dbref.collection)
+        value = self.__db.dereference(dbref)
+        return doc_cls(__kwargs = value)
+
+    def save(self, obj):
+        def transform_docs_to_dbrefs(data):
+            def transform_value(value):
+                if isinstance(value, Document):
+                    if value._id is None:
+                        value.save()
+                    return DBRef(value.objects.collection_name, transform_value(value._id))
+                elif isinstance(value, types.DictType):
+                    return transform_dict(value)
+                elif isinstance(value, types.ListType):
+                    return [transform_value(v) for v in value]
+                return value
+
+            def transform_dict(object):
+                for (key, value) in object.iteritems():
+                    object[key] = transform_value(value)
+                return object
+
+            return transform_dict(data)
+
+        return self._collection.save(transform_docs_to_dbrefs(obj))
+
 
     def __getattr__(self, name):
         return getattr(self._collection, name)
@@ -152,6 +183,8 @@ class DocumentBase(type):
             CursorProxy,
             new_class,
         ))
+
+        register_doc_class(new_class)
         return new_class
 
     def add_to_class(cls, name, value):
@@ -159,6 +192,7 @@ class DocumentBase(type):
             value.contribute_to_class(cls, name)
         else:
             setattr(cls, name, value)
+
 
 
 class Document(object):
@@ -210,6 +244,10 @@ class Document(object):
         if isinstance(value, dict):
             return AttributedDict(value)
 
+        if isinstance(value, DBRef):
+            value = self.objects.dereference(value)
+            self._data[name] = value
+
         return value
 
 
@@ -227,4 +265,26 @@ class Document(object):
 
     def update(self, data):
         self._data.update(data)
+
+
+
+class Cache(object):
+    __shared_state = dict(
+        doc_classes = {},
+    )
+
+    def __init__(self):
+        self.__dict__ = self.__shared_state
+
+    def register_doc_class(self, cls):
+        self.doc_classes[cls.objects.collection_name] = cls
+
+    def get_doc_class_for_collection(self, collection_name):
+        return self.doc_classes.get(collection_name, None)
+
+
+
+cache = Cache()
+register_doc_class = cache.register_doc_class
+get_doc_class_for_collection = cache.get_doc_class_for_collection
 

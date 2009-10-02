@@ -142,7 +142,9 @@ class DocumentBase(type):
             def __init__(self, real_cursor):
                 self.__cursor = real_cursor
                 self._doctype = new_class
-                self._sorted = False
+
+                if self._doctype._meta.ordering:
+                    self.sort(self._doctype._meta.ordering)
 
             def next(self):
                 """Wraps result into the custom class"""
@@ -150,7 +152,6 @@ class DocumentBase(type):
 
             def sort(self, *args, **kwargs):
                 self.__cursor.sort(*args, **kwargs)
-                self._sorted = True
                 return self
 
             def __getattr__(self, name):
@@ -170,8 +171,6 @@ class DocumentBase(type):
                 return self.__cursor.__len__()
 
             def __iter__(self):
-                if not self._sorted and self._doctype._meta.ordering:
-                    self.sort(self._doctype._meta.ordering)
                 return self
 
         # Set all neccessary methods

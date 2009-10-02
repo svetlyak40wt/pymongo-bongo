@@ -20,15 +20,11 @@ from distutils.errors import CCompilerError
 from distutils.errors import DistutilsPlatformError, DistutilsExecError
 from distutils.core import Extension
 
-import mongobongo
-
 requirements = []
 try:
     import xml.etree.ElementTree
 except ImportError:
     requirements.append('elementtree')
-
-version = mongobongo.version
 
 f = open('README.rst')
 try:
@@ -39,6 +35,7 @@ try:
 finally:
     f.close()
 
+version = '0.1.1'
 
 class GenerateDoc(Command):
     user_options = []

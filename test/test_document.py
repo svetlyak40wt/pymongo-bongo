@@ -24,6 +24,12 @@ class TestDoc(Document):
         return 'http://svetlyak.ru'
 
 
+class OrderedDoc(Document):
+    collection = 'test_docs'
+    class Meta:
+        ordering = [('user', ASCENDING)]
+
+
 class Documents(unittest.TestCase):
     def setUp(self):
         db = Database(get_connection(), "pymongo_test")
@@ -126,19 +132,26 @@ class Documents(unittest.TestCase):
         self.assertEqual('alex', docs[0].user)
         self.assertEqual('olga', docs[1].user)
 
-    def test_default_ordering(self):
-        class TestDoc(Document):
-            collection = 'test_docs'
-            class Meta:
-                ordering = [('user', ASCENDING)]
-
+    def test_default_ordering_for_iterator(self):
         names = ['vasily', 'alex', 'zuger', 'olga']
 
         for name in names:
-            TestDoc(user = name).save()
+            OrderedDoc(user = name).save()
 
-        for name, doc in zip(sorted(names), TestDoc.objects.all()):
+        for name, doc in zip(sorted(names), OrderedDoc.objects.all()):
             self.assertEqual(name, doc.user)
+
+    def test_default_ordering_for_single_items(self):
+        names = ['vasily', 'alex', 'zuger', 'olga']
+
+        for name in names:
+            OrderedDoc(user = name).save()
+
+        names = sorted(names)
+        objects = OrderedDoc.objects.all()
+
+        for i in range(len(names)):
+            self.assertEqual(names[i], objects[i].user)
 
 
 

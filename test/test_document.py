@@ -153,6 +153,15 @@ class Documents(unittest.TestCase):
         for i in range(len(names)):
             self.assertEqual(names[i], objects[i].user)
 
+    def test_default_ordering_for_find_one(self):
+        names = ['vasily', 'alex', 'zuger', 'olga']
+
+        for name in names:
+            OrderedDoc(user = name).save()
+
+        self.assertEqual('alex', OrderedDoc.objects.find_one().user)
+
+
 
 
 class Article(Document):

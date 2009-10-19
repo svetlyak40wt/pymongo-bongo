@@ -77,10 +77,11 @@ class CollectionManager(object):
         return self._cursor_class(self._collection.find(query))
 
     def find_one(self, query = {}):
-        data = self._collection.find_one(query)
+        data = list(self.find(query).limit(1))
+
         if data:
-            data = self._document_class(__kwargs = data)
-        return data
+            return self._document_class(__kwargs = data[0])
+        return None
 
     def dereference(self, dbref):
         doc_cls = get_doc_class_for_collection(dbref.collection)
@@ -139,16 +140,17 @@ class DocumentBase(type):
         collection = attrs.pop('collection')
 
         class CursorProxy(object):
+            _doctype = new_class
+
             def __init__(self, real_cursor):
                 self.__cursor = real_cursor
-                self._doctype = new_class
 
                 if self._doctype._meta.ordering:
                     self.sort(self._doctype._meta.ordering)
 
             def next(self):
                 """Wraps result into the custom class"""
-                return new_class(__kwargs = self.__cursor.next())
+                return self._doctype(__kwargs = self.__cursor.next())
 
             def sort(self, *args, **kwargs):
                 self.__cursor.sort(*args, **kwargs)
@@ -165,7 +167,7 @@ class DocumentBase(type):
                 if isinstance(index, slice):
                     return self
                 else:
-                    return new_class(__kwargs = result)
+                    return self._doctype(__kwargs = result)
 
             def __len__(self):
                 return self.__cursor.__len__()

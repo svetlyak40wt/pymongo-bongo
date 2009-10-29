@@ -84,4 +84,6 @@ The easiest way to run the tests is to install `nose <http://somethingaboutorang
 Credits
 -------
 
+* Slava Vishnyakov, for 'Document.remove' method.
+
 Wanna be listed here? Go to the GitHub, fork the project and send me patches :)

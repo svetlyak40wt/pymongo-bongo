@@ -153,6 +153,15 @@ class Documents(unittest.TestCase):
         for i in range(len(names)):
             self.assertEqual(names[i], objects[i].user)
 
+    def test_remove(self):
+        TestDoc(user = 'vasily').save()
+        alex = TestDoc(user = 'alex').save()
+
+        self.assertEqual(2, TestDoc.objects.count())
+
+        alex.remove()
+        self.assertEqual(1, TestDoc.objects.count())
+
     def test_default_ordering_for_find_one(self):
         names = ['vasily', 'alex', 'zuger', 'olga']
 

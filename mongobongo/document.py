@@ -264,6 +264,10 @@ class Document(object):
         self.objects.save(self._data)
         return self
 
+    def remove(self):
+        self.objects.remove(self._data)
+        return self
+
     def update(self, data):
         self._data.update(data)
 

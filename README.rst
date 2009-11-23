@@ -10,6 +10,17 @@ The PyMongoBongo distribution contains wrappers to add some syntax sugar to `PyM
 ChangeLog
 ---------
 
+0.1.3
+^^^^^
+
+* Fixed __len__ method, broken by changes in pymongo 1.1.1. Now mongobongo depends on pymongo >= 1.1.1.
+
+0.1.2
+^^^^^
+
+* Fixed ordering in case, when 'find_one' is used.
+* Fixed default cursor ordering, now it is applied in the constructor.
+
 0.1.1
 ^^^^^
 
@@ -37,7 +48,7 @@ If you have `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_ i
 
 Dependencies
 ------------
-The PyMongoBongo depends on PyMongo.
+The PyMongoBongo depends on PyMongo >= 1.1.1
 
 Additional dependencies are:
 

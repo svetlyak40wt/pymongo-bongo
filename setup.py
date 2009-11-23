@@ -35,7 +35,7 @@ try:
 finally:
     f.close()
 
-version = '0.1.2'
+version = '0.1.3'
 
 class GenerateDoc(Command):
     user_options = []

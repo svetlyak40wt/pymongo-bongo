@@ -170,7 +170,7 @@ class DocumentBase(type):
                     return self._doctype(__kwargs = result)
 
             def __len__(self):
-                return self.__cursor.__len__()
+                return self.__cursor.count(with_limit_and_skip=True)
 
             def __iter__(self):
                 return self

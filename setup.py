@@ -65,7 +65,7 @@ Please ask in the user forums for help.
 setup(
     name = 'pymongo-bongo',
     version = version,
-    description = 'Sytax sugar for PyMongo and MongoDB <http://www.mongodb.org>',
+    description = 'Syntax sugar for PyMongo and MongoDB <http://www.mongodb.org>',
     long_description = readme_content,
     author = 'Alexander Artemenko',
     author_email = 'svetlyak.40wt@gmail.com',
